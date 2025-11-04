@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}{{ copy.quiz.page_title }}{% endblock %}
+
+{% block content %}
+<section class="panel panel-hero">
+    <header class="hero-heading">
+        <h1>{{ copy.quiz.hero_title }}</h1>
+        <p class="hero-tagline">{{ copy.quiz.hero_tagline }}</p>
+    </header>
+    <p class="lede">{{ copy.quiz.hero_description }}</p>
+    <div class="meta-grid">
+        <div>
+            <h2>{{ copy.quiz.dimensions_title }}</h2>
+            <p>{{ copy.quiz.dimensions_desc }}</p>
+        </div>
+        <div>
+            <h2>{{ copy.quiz.duration_title }}</h2>
+            <p>{{ copy.quiz.duration_desc }}</p>
+        </div>
+        <div>
+            <h2>{{ copy.quiz.scoring_title }}</h2>
+            <p>{{ copy.quiz.scoring_desc }}</p>
+        </div>
+    </div>
+</section>
+
+{% if error %}
+<div class="alert alert-error">
+    {{ error }}
+</div>
+{% endif %}
+
+<form method="post" class="panel panel-form">
+    <input type="hidden" name="lang" value="{{ language }}">
+    <ol class="question-list">
+        {% for question in questions %}
+        {% set selected_value = submitted.get(question.field_name) %}
+        <li class="question-block">
+            <div class="question-text">
+                <span class="question-id">Q{{ question.id }}</span>
+                <p class="question-body">
+                    {% if language == 'zh' %}
+                        {{ question.prompt_cn }}
+                    {% else %}
+                        {{ question.prompt_en }}
+                    {% endif %}
+                </p>
+                <p class="question-meta">
+                    {{ copy.quiz.positive_dimension }}：{{ letter_descriptions[question.dimension]|default(question.dimension) }} ·
+                    {% if question.reverse %}
+                        {{ copy.quiz.reverse_scoring }}
+                    {% else %}
+                        {{ copy.quiz.direct_scoring }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="question-options">
+                {% for option in options %}
+                <label class="option-pill">
+                    <input type="radio" name="{{ question.field_name }}" value="{{ option.value }}" required {% if selected_value is not none and selected_value|int == option.value %}checked{% endif %}>
+                    <span>{{ option.label[language] }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+    <div class="form-actions">
+        <button type="submit" class="cta-button">{{ copy.quiz.submit_button }}</button>
+    </div>
+</form>
+{% endblock %}

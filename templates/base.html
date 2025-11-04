@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="{% if language == 'zh' %}zh-Hans{% else %}en{% endif %}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ copy.site.tagline }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container site-header__inner">
+            <a href="{{ url_for('questionnaire', lang=language) }}" class="brand">
+                <span class="brand-emblem">DevSpectrum</span>
+                <span class="brand-tagline">{{ copy.site.tagline }}</span>
+            </a>
+            <nav class="language-switcher" aria-label="Language selector">
+                {% for item in language_switcher %}
+                <a href="{{ item.url }}" class="lang-link{% if item.active %} is-active{% endif %}">
+                    {{ item.label }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+        <div class="container">
+            <p>{{ copy.site.footer }}</p>
+        </div>
+    </footer>
+</body>
+</html>

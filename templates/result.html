@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ copy.result.profile_label }} - {{ profile_code }}{% endblock %}
+
+{% block content %}
+<section class="panel panel-result">
+    <div class="result-header">
+        <div>
+            <p class="result-label">{{ copy.result.profile_label }}</p>
+            <h1 class="result-code">{{ profile_code }}</h1>
+            {% if persona_title %}
+            <p class="result-persona">{{ persona_title }}</p>
+            {% else %}
+            <p class="result-persona muted">{{ copy.result.no_persona }}</p>
+            {% endif %}
+            {% if persona_tagline %}
+            <p class="result-tagline">
+                {% if persona_tagline_heading %}
+                <span class="tagline-label">{{ persona_tagline_heading }}</span>
+                {% endif %}
+                {{ persona_tagline }}
+            </p>
+            {% endif %}
+        </div>
+        {% if image_url %}
+        <div class="result-avatar">
+            <img src="{{ url_for('static', filename='images/personas/' + profile_code + '.png') }}" alt="{{ copy.result.image_alt }}">
+        </div>
+        {% endif %}
+    </div>
+    <p class="lede">{{ copy.result.lede }}</p>
+    <div class="form-actions">
+        <form method="post" action="{{ url_for('export_pdf') }}">
+            <input type="hidden" name="lang" value="{{ language }}">
+            {% for item in responses %}
+            <input type="hidden" name="{{ item.question.field_name }}" value="{{ item.raw }}">
+            {% endfor %}
+            <button type="submit" class="link-button">{{ copy.result.download_pdf }}</button>
+        </form>
+    </div>
+</section>
+
+{% if persona_sections %}
+<section class="panel panel-persona">
+    <div class="persona-sections">
+        {% for section in persona_sections %}
+        <article class="persona-section">
+            <h2>{{ section.heading }}</h2>
+            <div class="persona-section__body">
+                {% for paragraph in section.paragraphs %}
+                <p>{{ paragraph }}</p>
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="panel panel-breakdown">
+    <h2>{{ copy.result.axis_breakdown }}</h2>
+    <div class="axis-grid">
+        {% for axis in breakdown %}
+        <article class="axis-card">
+            <header>
+                <h3>{{ axis.title }}</h3>
+                <p class="axis-code">{{ axis.axis_key }}</p>
+            </header>
+            <p class="axis-score">
+                {{ copy.result.score_label }}: <strong>{{ "%.1f"|format(axis.score) }}</strong>
+                <span class="axis-selected">{{ copy.result.favours_label }} {{ letter_descriptions[axis.selected]|default(axis.selected) }}</span>
+            </p>
+            <dl class="axis-details">
+                <div>
+                    <dt>{{ copy.result.first_trait_label }}</dt>
+                    <dd>{{ axis.positive_label }}</dd>
+                </div>
+                <div>
+                    <dt>{{ copy.result.second_trait_label }}</dt>
+                    <dd>{{ axis.negative_label }}</dd>
+                </div>
+            </dl>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel panel-secondary">
+    <h2>{{ copy.result.answer_review }}</h2>
+    <p class="muted">{{ copy.result.reverse_hint }}</p>
+    <ol class="response-list">
+        {% for item in responses %}
+        <li>
+            <div class="response-header">
+                <span class="question-id">Q{{ item.question.id }}</span>
+                <span class="badge">{{ item.axis }}</span>
+                {% if item.question.reverse %}<span class="badge badge-reverse">🔁</span>{% endif %}
+            </div>
+            <p class="question-en">
+                {% if language == 'zh' %}
+                    {{ item.question.prompt_cn }}
+                {% else %}
+                    {{ item.question.prompt_en }}
+                {% endif %}
+            </p>
+            <p class="muted">
+                {{ copy.result.answer_label }}: {{ item.raw }} ·
+                {{ copy.result.adjusted_label }}: {{ item.adjusted }} ·
+                {{ copy.result.contribution_label }}: {{ "%.1f"|format(item.weighted) }}
+            </p>
+        </li>
+        {% endfor %}
+    </ol>
+    <div class="form-actions">
+        <a href="{{ url_for('questionnaire', lang=language) }}" class="link-button">{{ copy.result.start_over }}</a>
+    </div>
+</section>
+{% endblock %}
